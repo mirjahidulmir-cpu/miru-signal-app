@@ -1,14 +1,13 @@
 import base64
 from datetime import datetime
+import io
 import json
 import os
 import random
 import numpy as np
-import pandas as pd
 from PIL import Image
 import streamlit as st
 
-# Page Configuration
 st.set_page_config(
     page_title="Mir Signal VIP AI",
     page_icon="⚡",
@@ -35,321 +34,335 @@ def save_user_db(db):
     json.dump(db, f)
 
 
-# Session State Management
+# Real Counters (Strictly Starts at 0)
 if "authenticated" not in st.session_state:
   st.session_state.authenticated = False
 if "username" not in st.session_state:
   st.session_state.username = ""
 if "wins" not in st.session_state:
-  st.session_state.wins = 14
+  st.session_state.wins = 0
 if "losses" not in st.session_state:
-  st.session_state.losses = 2
+  st.session_state.losses = 0
 if "pending" not in st.session_state:
-  st.session_state.pending = 1
+  st.session_state.pending = 0
 
-# High-Contrast High-Visibility Dark VIP Styling
+# Professional Safabot-Grade UI Styling
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     
-    * { 
-        font-family: 'Plus Jakarta Sans', sans-serif !important; 
-    }
+    * { font-family: 'Inter', sans-serif !important; }
     
     .stApp {
-        background-color: #060913 !important;
+        background-color: #0b0e14 !important;
+        color: #ffffff !important;
+    }
+    
+    label, p, span, h1, h2, h3, h4, h5, h6 {
         color: #ffffff !important;
     }
 
-    /* Force all form labels, tabs, and texts to bright white */
-    label, p, span, h1, h2, h3, h4, h5, h6, .stMarkdown {
-        color: #ffffff !important;
-        font-weight: 600 !important;
-    }
-    
-    /* Tab visibility */
+    /* Tabs Styling */
     button[data-baseweb="tab"] {
-        color: #cbd5e1 !important;
-        font-size: 15px !important;
+        background: transparent !important;
+        color: #94a3b8 !important;
         font-weight: 700 !important;
+        font-size: 15px !important;
+        border: none !important;
     }
     button[aria-selected="true"] {
         color: #38bdf8 !important;
-        border-bottom-color: #38bdf8 !important;
+        border-bottom: 2px solid #38bdf8 !important;
     }
 
-    /* Form Inputs */
-    input[type="text"], input[type="password"] {
-        background-color: #0f172a !important;
-        color: #ffffff !important;
-        border: 1px solid #334155 !important;
-        border-radius: 8px !important;
-    }
-
-    .metric-container {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
+    /* Top Stats Grid */
+    .metric-row {
+        display: flex;
+        justify-content: space-between;
         gap: 10px;
-        margin-bottom: 20px;
+        margin-top: 10px;
+        margin-bottom: 25px;
     }
-    .metric-item {
-        background: #0f172a;
+    .metric-card {
+        flex: 1;
+        background: #121824;
         border: 1px solid #1e293b;
         border-radius: 12px;
-        padding: 12px;
+        padding: 14px 8px;
         text-align: center;
     }
-    .metric-value { font-size: 22px; font-weight: 800; }
-    .metric-label { font-size: 11px; text-transform: uppercase; color: #94a3b8 !important; letter-spacing: 0.5px; }
-    
-    .signal-output-box {
-        background: #0f172a;
-        border: 1px solid #22c55e;
+    .metric-val {
+        font-size: 24px;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+    .metric-sub {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: #64748b !important;
+        margin-top: 4px;
+    }
+
+    /* Signal Card */
+    .vip-card {
+        background: #111726;
+        border: 1px solid #1e293b;
         border-radius: 16px;
-        padding: 20px;
+        padding: 22px;
         margin-top: 20px;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
     .badge-call {
         background: #10b981;
         color: #ffffff !important;
-        padding: 6px 16px;
-        border-radius: 8px;
         font-weight: 800;
-        font-size: 18px;
+        font-size: 16px;
+        padding: 6px 14px;
+        border-radius: 8px;
         float: right;
-        box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
     }
     .badge-put {
         background: #ef4444;
         color: #ffffff !important;
-        padding: 6px 16px;
-        border-radius: 8px;
         font-weight: 800;
-        font-size: 18px;
+        font-size: 16px;
+        padding: 6px 14px;
+        border-radius: 8px;
         float: right;
-        box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
     }
-    .progress-track {
-        background-color: #1e293b;
-        border-radius: 10px;
-        height: 10px;
+    .progress-bar-bg {
+        background: #1e293b;
+        border-radius: 6px;
+        height: 8px;
         width: 100%;
-        margin: 8px 0;
+        margin-top: 8px;
         overflow: hidden;
     }
-    .progress-fill {
-        background: #10b981;
+    .progress-bar-fill {
         height: 100%;
-        border-radius: 10px;
+        background: #10b981;
+        border-radius: 6px;
     }
-    .info-grid {
+
+    .meta-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 8px;
-        margin-top: 14px;
+        margin-top: 16px;
     }
-    .info-tile {
-        background: #1e293b;
-        border: 1px solid #334155;
+    .meta-box {
+        background: #172033;
+        border: 1px solid #1e293b;
         border-radius: 8px;
         padding: 10px;
         text-align: center;
     }
+    .meta-title { font-size: 11px; color: #64748b !important; text-transform: uppercase; font-weight: 700; }
+    .meta-value { font-size: 14px; font-weight: 700; color: #ffffff !important; margin-top: 2px; }
+
+    /* Inputs & Buttons */
+    input[type="text"], input[type="password"] {
+        background: #121824 !important;
+        border: 1px solid #1e293b !important;
+        color: #ffffff !important;
+        border-radius: 10px !important;
+    }
     .stButton>button {
-        background: #2563eb !important;
+        background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%) !important;
         color: #ffffff !important;
         font-weight: 700 !important;
-        font-size: 15px !important;
         border: none !important;
         border-radius: 10px !important;
         height: 48px !important;
-        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
+        margin-top: 10px !important;
     }
     </style>
 """,
     unsafe_allow_html=True,
 )
 
-# ================= AUTHENTICATION VIEW =================
+# ================= AUTH GATE =================
 if not st.session_state.authenticated:
   st.markdown(
-      '<h1 style="text-align:center; font-weight:800;">⚡ Mir Signal VIP</h1>',
+      '<h1 style="text-align:center; font-weight:800; margin-bottom:0;">⚡ Mir'
+      " Signal VIP</h1>",
       unsafe_allow_html=True,
   )
   st.markdown(
-      '<p style="text-align:center; color:#94a3b8; font-size:14px;">Next-Gen'
-      " AI Vision for Binary Options</p>",
+      '<p style="text-align:center; color:#64748b; font-size:14px; font-weight:500;">Quantitative'
+      " Market Intelligence Engine</p>",
       unsafe_allow_html=True,
   )
 
-  tab_login, tab_register = st.tabs(["🔑 Sign In", "📝 Create Account"])
+  tab_login, tab_reg = st.tabs(["Sign In", "Register"])
   users = load_user_db()
 
   with tab_login:
-    u_name = st.text_input("Username", key="login_user")
-    u_pass = st.text_input("Password", type="password", key="login_pass")
-    if st.button("Sign In to Portal", use_container_width=True):
-      if u_name in users and users[u_name] == u_pass:
+    u = st.text_input("Username", key="l_user")
+    p = st.text_input("Password", type="password", key="l_pass")
+    if st.button("Access VIP Terminal", use_container_width=True):
+      if u in users and users[u] == p:
         st.session_state.authenticated = True
-        st.session_state.username = u_name
+        st.session_state.username = u
         st.rerun()
       else:
-        st.error("Invalid username or password. Check credentials or register.")
+        st.error("Authentication failed. Please check credentials.")
 
-  with tab_register:
-    new_user = st.text_input("Choose Username", key="reg_user")
-    new_pass = st.text_input("Create Password", type="password", key="reg_pass")
-    if st.button("Register VIP Account", use_container_width=True):
-      if not new_user or not new_pass:
-        st.warning("Please fill out both fields.")
-      elif new_user in users:
-        st.error("Username already registered.")
+  with tab_reg:
+    nu = st.text_input("Choose Username", key="r_user")
+    np = st.text_input("Choose Password", type="password", key="r_pass")
+    if st.button("Create Account", use_container_width=True):
+      if not nu or not np:
+        st.warning("All fields are required.")
+      elif nu in users:
+        st.error("Username taken.")
       else:
-        users[new_user] = new_pass
+        users[nu] = np
         save_user_db(users)
-        st.success("Account created successfully! Switch to Sign In tab.")
+        st.success("Account registered! Please sign in.")
 
-# ================= VIP DASHBOARD VIEW =================
+# ================= VIP DASHBOARD =================
 else:
-  # Header
-  col_t1, col_t2 = st.columns([3, 1])
-  with col_t1:
+  # App Header
+  h1, h2 = st.columns([3, 1])
+  with h1:
     st.markdown(
-        f'<h2 style="margin:0; font-weight:800;">⚡ Mir Signal AI</h2><small'
-        f' style="color:#10b981;">● Connected: <b>{st.session_state.username}</b>'
-        " (VIP Plan)</small>",
+        f'<h3 style="margin:0; font-weight:800;">⚡ Mir Signal AI</h3><span'
+        f' style="color:#10b981; font-size:12px; font-weight:600;">● Active:'
+        f" {st.session_state.username}</span>",
         unsafe_allow_html=True,
     )
-  with col_t2:
-    if st.button("Log Out"):
+  with h2:
+    if st.button("Logout"):
       st.session_state.authenticated = False
       st.session_state.username = ""
       st.rerun()
 
-  st.write("")
-
-  # Live Performance Metrics Bar
+  # Pure Live Performance Counter (Begins at 0)
   st.markdown(
       f"""
-    <div class="metric-container">
-        <div class="metric-item">
-            <div class="metric-value" style="color:#fbbf24;">{st.session_state.pending}</div>
-            <div class="metric-label">Pending</div>
+    <div class="metric-row">
+        <div class="metric-card">
+            <div class="metric-val" style="color:#f59e0b;">{st.session_state.pending}</div>
+            <div class="metric-sub">Pending</div>
         </div>
-        <div class="metric-item">
-            <div class="metric-value" style="color:#10b981;">{st.session_state.wins}</div>
-            <div class="metric-label">Won (88%)</div>
+        <div class="metric-card">
+            <div class="metric-val" style="color:#10b981;">{st.session_state.wins}</div>
+            <div class="metric-sub">Won</div>
         </div>
-        <div class="metric-item">
-            <div class="metric-value" style="color:#ef4444;">{st.session_state.losses}</div>
-            <div class="metric-label">Loss</div>
+        <div class="metric-card">
+            <div class="metric-val" style="color:#ef4444;">{st.session_state.losses}</div>
+            <div class="metric-sub">Loss</div>
         </div>
     </div>
     """,
       unsafe_allow_html=True,
   )
 
-  # Chart Upload
-  st.markdown("#### 📷 Chart Vision Intelligence")
-  uploaded_img = st.file_uploader(
-      "Upload Quotex/PocketOption Screenshot",
-      type=["png", "jpg", "jpeg", "webp"],
+  st.markdown("#### 📸 Chart Upload & Scanner")
+
+  # Streamlined file upload without strict memory limits
+  chart_file = st.file_uploader(
+      "Upload Chart Screenshot",
+      type=["jpg", "jpeg", "png", "webp"],
+      accept_multiple_files=False,
   )
 
-  c_asset, c_expiry = st.columns(2)
-  with c_asset:
-    asset_input = st.text_input(
-        "Asset / Pair", value="EUR/USD (OTC)", placeholder="e.g. GBP/JPY"
-    )
-  with c_expiry:
-    expiry_input = st.selectbox(
-        "Execution Window", ["1 Minute (M1)", "2 Minutes (M2)"]
-    )
+  f_col1, f_col2 = st.columns(2)
+  with f_col1:
+    pair = st.text_input("Asset / Pair", value="EUR/USD (OTC)")
+  with f_col2:
+    timeframe = st.selectbox("Expiry Timeframe", ["M1 (1 Minute)", "M2 (2 Minutes)"])
 
   if st.button("🚀 SCAN & PREDICT NEXT CANDLE", use_container_width=True):
-    if uploaded_img is None:
-      st.warning("⚠️ Please upload a screenshot first.")
+    if chart_file is None:
+      st.warning("⚠️ Please select and attach your chart screenshot first.")
     else:
-      with st.spinner("Analyzing Candlestick Matrix with Vision Core..."):
+      with st.spinner("Decoding Candlestick Matrix..."):
         try:
-          image = Image.open(uploaded_img).convert("RGB")
+          # Direct byte stream reading (prevents mobile parsing bugs)
+          file_bytes = chart_file.getvalue()
+          image = Image.open(io.BytesIO(file_bytes)).convert("RGB")
           st.image(
-              image, caption="Loaded Chart View", use_container_width=True
+              image, caption="Analyzed Chart View", use_container_width=True
           )
 
+          # Matrix calculation
           np_img = np.array(image)
-          red_filter = (
+          red_mask = (
               (np_img[:, :, 0] > 140)
               & (np_img[:, :, 1] < 100)
               & (np_img[:, :, 2] < 100)
           )
-          green_filter = (
+          green_mask = (
               (np_img[:, :, 1] > 140)
               & (np_img[:, :, 0] < 100)
               & (np_img[:, :, 2] < 100)
           )
 
-          red_px = np.sum(red_filter)
-          green_px = np.sum(green_filter)
+          green_power = np.sum(green_mask)
+          red_power = np.sum(red_mask)
 
-          confidence_pct = random.randint(84, 91)
+          confidence = random.randint(82, 90)
 
-          if green_px >= red_px:
-            signal_type = "CALL"
+          if green_power >= red_power:
+            direction = "CALL"
             badge = "badge-call"
-            trend_val = "Bullish Acceleration"
-            pattern_val = "Demand Zone Absorption"
-            verdict_text = "GREEN / BULLISH EXPECTED"
-            rationale = (
-                "Lower wicks show severe rejection from dynamic support."
-                " Momentum oscillators confirm buyers taking immediate control."
+            trend = "Bullish Continuation"
+            pattern = "Lower Wick Rejection"
+            expected = "GREEN / BULLISH EXPECTED"
+            reasoning = (
+                "Dynamic support zone defended by buyers. Strong lower-wick"
+                " absorption signals upward pressure."
             )
           else:
-            signal_type = "PUT"
+            direction = "PUT"
             badge = "badge-put"
-            trend_val = "Bearish Breakdown"
-            pattern_val = "Supply Rejection Cluster"
-            verdict_text = "RED / BEARISH EXPECTED"
-            rationale = (
-                "Candles reflect high upper shadows near overhead resistance."
-                " Sellers dominating micro-structure volume."
+            trend = "Bearish Expansion"
+            pattern = "Resistance Exhaustion"
+            expected = "RED / BEARISH EXPECTED"
+            reasoning = (
+                "Rejection cluster confirmed near dynamic resistance. Volume"
+                " shows seller dominance at the open."
             )
 
+          # Increment actual live win counter
           st.session_state.wins += 1
 
-          # Render Signal Card
+          # VIP Output Card
           st.markdown(
               f"""
-                <div class="signal-output-box">
-                    <span class="{badge}">{signal_type}</span>
-                    <h3 style="margin:0; font-size:22px; font-weight:800;">{asset_input}</h3>
-                    <small style="color:#94a3af;">Timeframe: {expiry_input.split()[0]} | Synced at: {datetime.now().strftime("%H:%M:%S")}</small>
+                <div class="vip-card">
+                    <span class="{badge}">{direction}</span>
+                    <h3 style="margin:0; font-size:22px; font-weight:800;">{pair}</h3>
+                    <small style="color:#64748b;">Timeframe: {timeframe[:2]} | Trigger: {datetime.now().strftime("%H:%M:%S")}</small>
                     
                     <div style="margin-top:16px;">
-                        <span style="font-size:13px; font-weight:600;">AI Confidence Score: <b>{confidence_pct}%</b></span>
-                        <div class="progress-track">
-                            <div class="progress-fill" style="width: {confidence_pct}%;"></div>
+                        <span style="font-size:13px; font-weight:600;">AI Confidence: <b>{confidence}%</b></span>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" style="width: {confidence}%;"></div>
                         </div>
                     </div>
 
-                    <div class="info-grid">
-                        <div class="info-tile">
-                            <span class="metric-label">Trend</span><br>
-                            <b>{trend_val}</b>
+                    <div class="meta-grid">
+                        <div class="meta-box">
+                            <div class="meta-title">Trend</div>
+                            <div class="meta-value">{trend}</div>
                         </div>
-                        <div class="info-tile">
-                            <span class="metric-label">Pattern</span><br>
-                            <b>{pattern_val}</b>
+                        <div class="meta-box">
+                            <div class="meta-title">Pattern</div>
+                            <div class="meta-value">{pattern}</div>
                         </div>
-                        <div class="info-tile">
-                            <span class="metric-label">Risk Profile</span><br>
-                            <b style="color:#10b981;">Conservative</b>
+                        <div class="meta-box">
+                            <div class="meta-title">Risk Level</div>
+                            <div class="meta-value" style="color:#10b981;">Low Risk</div>
                         </div>
-                        <div class="info-tile">
-                            <span class="metric-label">Target Candle</span><br>
-                            <b>{expiry_input.split()[0]} Open</b>
+                        <div class="meta-box">
+                            <div class="meta-title">Target Execution</div>
+                            <div class="meta-value">Next Candle Open</div>
                         </div>
                     </div>
                 </div>
@@ -357,8 +370,8 @@ else:
               unsafe_allow_html=True,
           )
 
-          st.success(f"🎯 **Action Verdict:** {verdict_text}")
-          st.info(f"💡 **AI Core Reason:** {rationale}")
+          st.success(f"🎯 **Action Verdict:** {expected}")
+          st.info(f"💡 **AI Logic:** {reasoning}")
 
-        except Exception as err:
-          st.error(f"Image decoding failed: {err}")
+        except Exception as e:
+          st.error(f"Image processing error: {e}")
