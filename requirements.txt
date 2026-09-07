@@ -1,2 +1,4 @@
-ccxt
+streamlit
+pillow
+numpy
 pandas
