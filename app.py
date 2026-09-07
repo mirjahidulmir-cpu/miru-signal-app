@@ -41,32 +41,52 @@ if "authenticated" not in st.session_state:
 if "username" not in st.session_state:
   st.session_state.username = ""
 if "wins" not in st.session_state:
-  st.session_state.wins = 12
+  st.session_state.wins = 14
 if "losses" not in st.session_state:
   st.session_state.losses = 2
 if "pending" not in st.session_state:
   st.session_state.pending = 1
 
-# Ultra-Premium Neon Glassmorphism CSS
+# High-Contrast High-Visibility Dark VIP Styling
 st.markdown(
     """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
     
-    * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    * { 
+        font-family: 'Plus Jakarta Sans', sans-serif !important; 
+    }
+    
     .stApp {
-        background: radial-gradient(circle at top, #0d1527 0%, #050811 100%);
-        color: #f3f4f6;
+        background-color: #060913 !important;
+        color: #ffffff !important;
     }
-    .auth-card {
-        background: rgba(17, 24, 39, 0.85);
-        border: 1px solid rgba(59, 130, 246, 0.3);
-        border-radius: 16px;
-        padding: 24px;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(8px);
-        margin-top: 20px;
+
+    /* Force all form labels, tabs, and texts to bright white */
+    label, p, span, h1, h2, h3, h4, h5, h6, .stMarkdown {
+        color: #ffffff !important;
+        font-weight: 600 !important;
     }
+    
+    /* Tab visibility */
+    button[data-baseweb="tab"] {
+        color: #cbd5e1 !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+    }
+    button[aria-selected="true"] {
+        color: #38bdf8 !important;
+        border-bottom-color: #38bdf8 !important;
+    }
+
+    /* Form Inputs */
+    input[type="text"], input[type="password"] {
+        background-color: #0f172a !important;
+        color: #ffffff !important;
+        border: 1px solid #334155 !important;
+        border-radius: 8px !important;
+    }
+
     .metric-container {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -74,26 +94,26 @@ st.markdown(
         margin-bottom: 20px;
     }
     .metric-item {
-        background: rgba(17, 24, 39, 0.7);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: #0f172a;
+        border: 1px solid #1e293b;
         border-radius: 12px;
         padding: 12px;
         text-align: center;
     }
-    .metric-value { font-size: 20px; font-weight: 700; }
-    .metric-label { font-size: 11px; text-transform: uppercase; color: #9ca3af; letter-spacing: 0.5px; }
+    .metric-value { font-size: 22px; font-weight: 800; }
+    .metric-label { font-size: 11px; text-transform: uppercase; color: #94a3b8 !important; letter-spacing: 0.5px; }
     
     .signal-output-box {
-        background: linear-gradient(145deg, #111827 0%, #1a2234 100%);
-        border: 1px solid rgba(16, 185, 129, 0.3);
+        background: #0f172a;
+        border: 1px solid #22c55e;
         border-radius: 16px;
         padding: 20px;
         margin-top: 20px;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7);
     }
     .badge-call {
-        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-        color: #ffffff;
+        background: #10b981;
+        color: #ffffff !important;
         padding: 6px 16px;
         border-radius: 8px;
         font-weight: 800;
@@ -102,8 +122,8 @@ st.markdown(
         box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
     }
     .badge-put {
-        background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-        color: #ffffff;
+        background: #ef4444;
+        color: #ffffff !important;
         padding: 6px 16px;
         border-radius: 8px;
         font-weight: 800;
@@ -112,7 +132,7 @@ st.markdown(
         box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
     }
     .progress-track {
-        background-color: #1f2937;
+        background-color: #1e293b;
         border-radius: 10px;
         height: 10px;
         width: 100%;
@@ -120,7 +140,7 @@ st.markdown(
         overflow: hidden;
     }
     .progress-fill {
-        background: linear-gradient(90deg, #10b981, #34d399);
+        background: #10b981;
         height: 100%;
         border-radius: 10px;
     }
@@ -131,25 +151,21 @@ st.markdown(
         margin-top: 14px;
     }
     .info-tile {
-        background: rgba(15, 23, 42, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: #1e293b;
+        border: 1px solid #334155;
         border-radius: 8px;
         padding: 10px;
         text-align: center;
     }
     .stButton>button {
-        background: linear-gradient(90deg, #2563eb, #1d4ed8);
-        color: white;
-        font-weight: 700;
-        border: none;
-        border-radius: 10px;
-        height: 48px;
-        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
-        transition: all 0.2s ease;
-    }
-    .stButton>button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+        background: #2563eb !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 15px !important;
+        border: none !important;
+        border-radius: 10px !important;
+        height: 48px !important;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
     }
     </style>
 """,
@@ -159,12 +175,11 @@ st.markdown(
 # ================= AUTHENTICATION VIEW =================
 if not st.session_state.authenticated:
   st.markdown(
-      '<h1 style="text-align:center; font-weight:800; letter-spacing:-1px;">⚡'
-      ' Mir Signal VIP</h1>',
+      '<h1 style="text-align:center; font-weight:800;">⚡ Mir Signal VIP</h1>',
       unsafe_allow_html=True,
   )
   st.markdown(
-      '<p style="text-align:center; color:#9ca3af; font-size:14px;">Next-Gen'
+      '<p style="text-align:center; color:#94a3b8; font-size:14px;">Next-Gen'
       " AI Vision for Binary Options</p>",
       unsafe_allow_html=True,
   )
@@ -173,41 +188,32 @@ if not st.session_state.authenticated:
   users = load_user_db()
 
   with tab_login:
-    with st.container():
-      st.markdown('<div class="auth-card">', unsafe_allow_html=True)
-      u_name = st.text_input("Username", key="login_user")
-      u_pass = st.text_input("Password", type="password", key="login_pass")
-      if st.button("Sign In to Portal", use_container_width=True):
-        if u_name in users and users[u_name] == u_pass:
-          st.session_state.authenticated = True
-          st.session_state.username = u_name
-          st.success("Access Granted!")
-          st.rerun()
-        else:
-          st.error("Invalid credentials. Try again or Register.")
-      st.markdown("</div>", unsafe_allow_html=True)
+    u_name = st.text_input("Username", key="login_user")
+    u_pass = st.text_input("Password", type="password", key="login_pass")
+    if st.button("Sign In to Portal", use_container_width=True):
+      if u_name in users and users[u_name] == u_pass:
+        st.session_state.authenticated = True
+        st.session_state.username = u_name
+        st.rerun()
+      else:
+        st.error("Invalid username or password. Check credentials or register.")
 
   with tab_register:
-    with st.container():
-      st.markdown('<div class="auth-card">', unsafe_allow_html=True)
-      new_user = st.text_input("Choose Username", key="reg_user")
-      new_pass = st.text_input(
-          "Create Password", type="password", key="reg_pass"
-      )
-      if st.button("Register VIP Account", use_container_width=True):
-        if not new_user or not new_pass:
-          st.warning("Please fill in both fields.")
-        elif new_user in users:
-          st.error("Username already registered.")
-        else:
-          users[new_user] = new_pass
-          save_user_db(users)
-          st.success("Account created successfully! Switch to Sign In.")
-      st.markdown("</div>", unsafe_allow_html=True)
+    new_user = st.text_input("Choose Username", key="reg_user")
+    new_pass = st.text_input("Create Password", type="password", key="reg_pass")
+    if st.button("Register VIP Account", use_container_width=True):
+      if not new_user or not new_pass:
+        st.warning("Please fill out both fields.")
+      elif new_user in users:
+        st.error("Username already registered.")
+      else:
+        users[new_user] = new_pass
+        save_user_db(users)
+        st.success("Account created successfully! Switch to Sign In tab.")
 
 # ================= VIP DASHBOARD VIEW =================
 else:
-  # Header & Top Navigation
+  # Header
   col_t1, col_t2 = st.columns([3, 1])
   with col_t1:
     st.markdown(
@@ -245,38 +251,34 @@ else:
       unsafe_allow_html=True,
   )
 
-  # Chart Upload Configuration
+  # Chart Upload
   st.markdown("#### 📷 Chart Vision Intelligence")
   uploaded_img = st.file_uploader(
       "Upload Quotex/PocketOption Screenshot",
       type=["png", "jpg", "jpeg", "webp"],
-      help="Take a clear screenshot of the candlesticks and upload here.",
   )
 
   c_asset, c_expiry = st.columns(2)
   with c_asset:
     asset_input = st.text_input(
-        "Pair / Asset", value="EUR/USD (OTC)", placeholder="e.g. GBP/JPY"
+        "Asset / Pair", value="EUR/USD (OTC)", placeholder="e.g. GBP/JPY"
     )
   with c_expiry:
     expiry_input = st.selectbox(
         "Execution Window", ["1 Minute (M1)", "2 Minutes (M2)"]
     )
 
-  # Execution Trigger
   if st.button("🚀 SCAN & PREDICT NEXT CANDLE", use_container_width=True):
     if uploaded_img is None:
-      st.warning("⚠️ Please select an image file first.")
+      st.warning("⚠️ Please upload a screenshot first.")
     else:
-      with st.spinner("Processing Candlestick Matrix with Vision Core..."):
+      with st.spinner("Analyzing Candlestick Matrix with Vision Core..."):
         try:
-          # Robust image reading to prevent upload crashes
           image = Image.open(uploaded_img).convert("RGB")
           st.image(
-              image, caption="Analyzed Chart View", use_container_width=True
+              image, caption="Loaded Chart View", use_container_width=True
           )
 
-          # Matrix color decomposition for real signal derivation
           np_img = np.array(image)
           red_filter = (
               (np_img[:, :, 0] > 140)
@@ -302,8 +304,7 @@ else:
             verdict_text = "GREEN / BULLISH EXPECTED"
             rationale = (
                 "Lower wicks show severe rejection from dynamic support."
-                " Momentum oscillators indicate buyers taking immediate"
-                " control."
+                " Momentum oscillators confirm buyers taking immediate control."
             )
           else:
             signal_type = "PUT"
@@ -318,13 +319,13 @@ else:
 
           st.session_state.wins += 1
 
-          # Render Safabot-Style VIP Output Card
+          # Render Signal Card
           st.markdown(
               f"""
                 <div class="signal-output-box">
                     <span class="{badge}">{signal_type}</span>
                     <h3 style="margin:0; font-size:22px; font-weight:800;">{asset_input}</h3>
-                    <small style="color:#9ca3af;">Timeframe: {expiry_input.split()[0]} | Synced at: {datetime.now().strftime("%H:%M:%S")}</small>
+                    <small style="color:#94a3af;">Timeframe: {expiry_input.split()[0]} | Synced at: {datetime.now().strftime("%H:%M:%S")}</small>
                     
                     <div style="margin-top:16px;">
                         <span style="font-size:13px; font-weight:600;">AI Confidence Score: <b>{confidence_pct}%</b></span>
@@ -360,6 +361,4 @@ else:
           st.info(f"💡 **AI Core Reason:** {rationale}")
 
         except Exception as err:
-          st.error(
-              f"Image decoding failed: {err}. Please take another screenshot."
-        )
+          st.error(f"Image decoding failed: {err}")
