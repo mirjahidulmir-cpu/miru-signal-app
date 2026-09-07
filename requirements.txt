@@ -1,3 +1,2 @@
 ccxt
 pandas
-pandas_ta
